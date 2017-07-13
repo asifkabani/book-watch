@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>BookWatch - find a movie, based off of a book.</title>
+    <link rel="stylesheet" href="css/foundation.min.css">
+    <link rel="stylesheet" href="css/style.css">
+  </head>
+  <body>
+
+    <div class="row">
+      <div class="large-12 columns">
+        <header>
+          <h1>bookWatch</h1>
+          <p>Search by author, ISBN, or title.</p>
+        </header>
+      </div>
+    </div>
+    <div class="row">
+      <div class="large-12 columns">
+        <main>
+          <form class="js-form">
+            <input class="js-input" type="text" name="search" required><br>
+            <label for="title">Title</label><input id="title" class="js-radio" type="radio" name="option" value="title" checked="checked">
+            <label for="author">Author</label><input id="author" class="js-radio" type="radio" name="option" value="author">
+            <label for="isbn">ISBN</label><input id="isbn" class="js-radio" type="radio" name="option" value="isbn"><br>
+            <button class="js-submit large button" type="submit" name="submit">Submit</button>
+          </form>
+        </main>
+      </div>
+    </div>
+    <div class="row">
+      <div class="large-12 columns">
+        <section>
+          <h1>Results</h1>
+          <div class="js-results"></div>
+          <button class="js-load large button" type="button" name="button">Load</button>
+        </section>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"
+    integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+    crossorigin="anonymous"></script>
+    <script type="text/javascript" src="js/ajaxSuggestions.js"></script>
+    <script type="text/javascript" src="js/app2.js"></script>
+  </body>
+</html>
