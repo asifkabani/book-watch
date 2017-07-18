@@ -4,45 +4,58 @@
     <meta charset="utf-8">
     <title>BookWatch - find a movie, based off of a book.</title>
     <link rel="stylesheet" href="css/foundation.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Playfair+Display|Raleway:900" rel="stylesheet">
+    <link rel="stylesheet" href="css/card-user-profile.css">
     <link rel="stylesheet" href="css/style.css">
   </head>
   <body>
 
-    <div class="row">
-      <div class="large-12 columns">
-        <header>
-          <h1>bookWatch</h1>
-          <p>Search by author, ISBN, or title.</p>
-        </header>
+      <header>
+        <div class="row">
+          <div class="large-12 columns">
+            <img class="logo" src="img/bookWatch-logo.png" alt="">
+            <h1>bookWatch</h1>
+            <p>Ever wanted to know if a book was made into a movie? Well now you can.</p>
+            <p>Search by title, author, or ISBN of a book and if there is a result, we will get it for you.</p>
+          </div>
+        </div>
+      </header>
+      <div class="row">
+        <div class="large-12 column">
+          <div class="form-outer">
+            <main>
+              <form class="js-form book-search">
+							<div class="input-group">
+								<input class="input-group-field js-input" type="text" name="search" required>
+								<div class="input-group-button">
+									<input type="submit" class="js-submit large button" value="Search">
+								</div>
+							</div>
+              <div class="radio-group">
+								<label for="title">Title</label><input id="title" type="radio" name="option" value="title" checked="checked">
+                <label for="author">Author</label><input placeholder="Name of the author" id="author" type="radio" name="option" value="author">
+                <label for="isbn">ISBN</label><input placeholder="ISBN Number" id="isbn" type="radio" name="option" value="isbn"><br>
+							</div>
+							<div class="js-callout callout warning">
+								<h5>Search by Title of Book</h5>
+								<p>Hidden Figures, Live By Night, The Lost City of Z</p>
+							</div>
+              </form>
+            </main>
+          </div>
+        </div>
       </div>
-    </div>
-    <div class="row">
-      <div class="large-12 columns">
-        <main>
-          <form class="js-form">
-            <input class="js-input" type="text" name="search" required><br>
-            <label for="title">Title</label><input id="title" class="js-radio" type="radio" name="option" value="title" checked="checked">
-            <label for="author">Author</label><input id="author" class="js-radio" type="radio" name="option" value="author">
-            <label for="isbn">ISBN</label><input id="isbn" class="js-radio" type="radio" name="option" value="isbn"><br>
-            <button class="js-submit large button" type="submit" name="submit">Submit</button>
-          </form>
-        </main>
+      <div class="row">
+        <div class="large-12 columns">
+          <section>
+            <div class="js-results movie-results hide"></div>
+          </section>
+        </div>
       </div>
-    </div>
-    <div class="row">
-      <div class="large-12 columns">
-        <section>
-          <h1>Results</h1>
-          <div class="js-results"></div>
-          <button class="js-load large button" type="button" name="button">Load</button>
-        </section>
-      </div>
-    </div>
 
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"
     integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
     crossorigin="anonymous"></script>
-    <script type="text/javascript" src="js/ajaxSuggestions.js"></script>
     <script type="text/javascript" src="js/app2.js"></script>
   </body>
 </html>
