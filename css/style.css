@@ -36,7 +36,7 @@ header p {
   font-size: 1.50em;
   text-shadow: 1px 1px 1px #f2ece9;
   line-height: 0.5;
-  color: #235C99;
+  color: #0f263e;
 }
 
 .logo {
@@ -56,10 +56,16 @@ header p {
 
 .input-group-field {
   font-family: Arial, sans-serif;
+  font-size: 2.5rem;
+  height: 4rem;
 }
 
-.button {
+.button.large {
+  background: url(../img/magnifier.png) center center no-repeat;
+  background-size: 25px 25px;
   background-color: #235C99;
+  height: 4rem;
+  font-size: 2rem;
 }
 
 .form-outer {
@@ -83,11 +89,16 @@ label {
   text-shadow: 1px 1px 1px #F2ECE9;
 }
 
-
 .callout.warning {
   background-color: white;
   border: 1px solid white;
   color: #919CAB;
+}
+
+.callout.danger {
+  background-color: red;
+  border: 1px solid white;
+  color: white;
 }
 
 .callout p {
