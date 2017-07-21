@@ -1,284 +1,268 @@
-/*
-BookWatch
-BookWatch is a web application for searching for movies, which are based-off
-of books. Search by author, title, or ISBN.
-*/
-
-/*
-Low Level
-- On submit, capture value of radio button selected, and value of the input field.
-- Make a function which passes in the searchTerm and getRadioValue and checks to searchTerm
-which radio value has been chosen. Depending on that, add the needed API parameter here from
-Google Books (isbn:, inauthor:, intitle:) and pass that plus the searchTerm into the next function.
-- The next function needs to have a way to take in the searchTerm and get the search data. So if
-e.g. Stephen King was entered, from Google Books get the author to match Stephen King.
-- How do I handle a non space? Give instructions on the screen depending on what radio choice they select
-in the beginning, so if they choose ISBN, give them an example and then have the search bar below the example.
-So if ISBN radio is chosen "Enter the ISBN number of the book. Should be 9 or 13 numbers. (e.g. 3939484930)".
-If author, "Enter author name to search by (e.g. stephen king). Make sure to put spaces." IF title then just
-"Enter title to search by." Later if possible try to restrict the input field based on the radio button which is selected.
-So if ISBN is selected before the user types anything to search, set the field to have no more then the max numbers
-an ISBN has, and only allow numbers at that point. IF title or author, then no numbers allowed, no maximum.
-- If nothing is found due to user error or result, show something on the page like no results found, please try again
-or search by another option.
-*/
-
 'use strict';
 
-// Watch for submit.
-function userInput() {
-  $('.js-form').submit(function(event) {
-    event.preventDefault();
-    searchInput();
+// Global variables
+// Radio button input value (ISBN, author, title).
+let radioValue = '';
+// User search text.
+let searchTerm = '';
+// Image path from getMovieConfig.
+let imagePath = '';
+// Current title of the book(s).
+let bookTitle = '';
+// Current author.
+let bookAuthor = '';
+// bookAuthorId for movie search.
+let bookAuthorId = '';
+// Hold all the ajax results of calls.
+let allItems = [];
+
+
+/*
+Create URL path from API to get the baseUrl and fileSize (image dimensions).
+This will be put into the imagePath variable to call later and append the path
+to the image file of the movie poster.
+*/
+function getMovieConfig() {
+  let apiQuery = {
+    api_key: '768e86dde3174110a0fbfe80aa8bbb75'
+  }
+  $.getJSON("https://api.themoviedb.org/3/configuration", apiQuery, function(data) {
+    let baseUrl = data.images.base_url;
+    let fileSize = data.images.logo_sizes[4];
+    imagePath = baseUrl + fileSize;
+  });
+  return getRadioValue();
+}
+
+/*
+Check the value of the radioValue.
+- If author: send to searchByPerson function.
+- If title: search the movie API with the title of the movie.
+- If ISBN: search the books API with the ISBN and get the author and title. Then
+  search the movie API for the author as the writer of a movie, and if the title
+  is found display it.
+*/
+function getRadioValue() {
+  if (radioValue === 'isbn') {
+    // Remove hypens from numbers (per API call for ISBN numbers).
+    let cleanSearchTerm = searchTerm.replace(/-/g, "");
+    searchTerm = 'isbn:' + cleanSearchTerm;
+    searchBookIsbn();
+  } else if (radioValue === 'author') {
+    searchByPerson();
+  } else {
+    searchByTitle();
+  }
+}
+
+// If the search is for ISBN, make a call to books API and search for the ISBN.
+// Call the query by getRadioValue function to get the correct search parameter.
+function searchBookIsbn() {
+  let apiQuery = {
+    q: searchTerm,
+    key: 'AIzaSyD7XwCHKgHcFqBw4S0EGu4RQi4lMcJjrrc'
+  }
+  $.getJSON("https://www.googleapis.com/books/v1/volumes", apiQuery, function(data) {
+    let getData = data.items;
+    if (getData != undefined) {
+      return getData.map(function(data) {
+        bookTitle = data.volumeInfo.title;
+        searchTerm = bookTitle;
+        bookAuthor = data.volumeInfo.authors[0];
+        searchByTitle();
+      });
+    } else {
+      $('.js-danger').fadeIn('slow').delay(1000).fadeOut('slow');
+    }
   });
 }
 
-// From the form submission, pull in the getRadioValue (isbn, author, title) and
-// their searchTerm. Depending on the value, send the searchTerm along with anonymous
-// API parameters to the runSearch function.
-// function searchInput(getRadioValue, searchTerm) {
-//   let radioValue = $("input[name='option']:checked").val();
-//   console.log(radioValue);
-//   // if (getRadioValue === 'isbn') {
-//   //   runSearch("isbn:" + searchTerm);
-//   // } else if (getRadioValue === 'author') {
-//   //   runSearch("inauthor:" + searchTerm);
-//   // } else if (getRadioValue === 'title') {
-//   //   runSearch("intitle:" + searchTerm);
-//   // }
-// }
-
-// This function will take the searchTerm, endPoint, apiKey, apiQuery as arguments.
-// The last three arguments are needed for the $.getJSON() method to execute.
-// This way we can call the function as needed using either of the movie or book api.
-// function runSearch(searchTerm, endPoint, apiKey) {
-//   console.log(searchTerm)
-//   let apiQuery = {
-//     q: searchTerm,
-//     key: apiKey
-//   }
-//   $.getJSON(endPoint, apiQuery, getResults);
-// }
-//
-// function getResults() {
-// }
-
-// After everything is done, this will run the web app calling all other functions.
-// function () {
-//
-// }
-
-// let x = runSearch(searchTerm, 'https://www.googleapis.com/books/v1/volumes', 'AIzaSyD7XwCHKgHcFqBw4S0EGu4RQi4lMcJjrrc')
-
-
-// From the results, this function will check if any results came back or not.
-  // Get the total number of items returned
-  // let totalResults = data.totalItems;
-  // console.log(totalResults)
-  // If there is none, show the user an error message or none found.
-  // if (totalResults === 0) {
-  //   console.log("nothing found")
-  // } else {
-  //   console.log("found")
-    // let titleOfBook = data.items.map(function(obj) {
-    // return obj.volumeInfo.title;
-  // }
-  // console.log(titleOfBook)
-// }
-
-// function resultsByAuthor(data) {
-//   runSearch({
-//     q: 'stephen king',
-//     'https://www.googleapis.com/books/v1/volumes',
-//     'AIzaSyD7XwCHKgHcFqBw4S0EGu4RQi4lMcJjrrc'
-//   })
-// }
-// let x = runSearch('stephen king', 'https://www.googleapis.com/books/v1/volumes', 'AIzaSyD7XwCHKgHcFqBw4S0EGu4RQi4lMcJjrrc')
-
-// Receive the data from the API call, depending on author, title, ISBN.
-// function getResults(data) {
-//   console.log(data)
-//   // Get the total number of items returned
-//   let totalResults = data.totalItems;
-//   // If there is none, show the user an error message or none found.
-//   if (totalResults === 0) {
-//     console.log("nothing found")
-//   } else {
-//     console.log("found")
-//     let titleOfBook = data.items.map(function(obj) {
-//       return obj.volumeInfo.title;
-//     });
-//     console.log(titleOfBook)
-//   }
-//   // var x = data.items[0].volumeInfo.title;
-//   // console.log(x)
-//   // for (var i = 0; i < data.length; i++) {
-//   //   dataArray.push(i);
-//   //   return dataArray;
-//   // }
-// }
-
-
-// If searched by Author
-// let newResults = function() {
-//   let x = runSearch('stephen king', 'https://www.googleapis.com/books/v1/volumes', 'AIzaSyD7XwCHKgHcFqBw4S0EGu4RQi4lMcJjrrc')
-// };
-
-
-
-// function userInput() {
-//   $('.js-form').submit(function(event) {
-//     event.preventDefault();
-//     alert("hi")
-//     // Get the value of the radio button checked: isbn, author, or title.
-//     // if (!$('input[name=option]:checked').length > 0) {
-//     //   alert("hi")
-//     // }
-//     // Get the value of the user search input.
-//     // let searchTerm = $('.js-input').val();
-//     // Check if the required fields are selected before submitting.
-//     // let checkInputs = function checkInputs() {
-//     //   if (getRadioValue.length > 0) {
-//     //     alert("fill it in")
-//     //   }
-//     // };
-//
-//
-//
-//     // Run the function to searchBy passing in the two variables.
-//     // searchInput(getRadioValue, searchTerm);
-//     // Run the getData function with the search term and the successCall.
-//     // getSearch(searchTerm, getResults)
-//     // $("#photos").empty().append("");
-//   });
-// }
-
-
-
-
-// Create function to get results by ISBN.
-// function searchByAuthor(searchTerm) {
-//   // Endpoint URL for volumes search for books.
-//   let getEndpoint = 'https://www.googleapis.com/books/v1/volumes';
-//   // Create query to pass to the url.
-//   var apiQuery = {
-//     q: "isbn:" + searchTerm,
-//     key: 'AIzaSyD7XwCHKgHcFqBw4S0EGu4RQi4lMcJjrrc'
-//   };
-//   $.getJSON(getEndpoint, apiQuery, getResults);
-// }
-
-// Create function to get results by ISBN.
-// function searchByIsbn(searchTerm, myEndPoint) {
-//   // Endpoint URL for volumes search for books.
-//   let getEndpoint = 'https://www.googleapis.com/books/v1/volumes';
-//   // Create query to pass to the url.
-//   var apiQuery = {
-//     q: "isbn:" + searchTerm,
-//     key: 'AIzaSyD7XwCHKgHcFqBw4S0EGu4RQi4lMcJjrrc'
-//   };
-//   $.getJSON(getEndpoint, apiQuery, getResults);
-// }
-
-
-
-
-
-
-
-
-
-
-// Create a function to get the data. Pass two parameters, one for the searchTerm
-// and one for the callback.
-// var getData = function(searchTerm, callback) {
-//   // Get the image of the movie search query.
-//   var getImageUrl = 'https://api.themoviedb.org/3/search/movie';
-//   var movieApiQuery = {
-//     api_key: '768e86dde3174110a0fbfe80aa8bbb75',
-//     query: "the grapes of wrath"
-//   };
-//   // Call the jQuery $.getJSON to make the ajax call.
-//   $.getJSON(getImageUrl, movieApiQuery, successCall);
-// };
-
-// TMDB endpoint for configuration, this is needed as per the API:
-// "In order to generate a fully working image URL, you'll need 3 pieces of data.
-// Those pieces are a base_url, a file_size and a file_path."
-
-// Get the base_url and file_size from /configuration endpoint.
-// var getBaseUrl = function getBaseUrl(obj) {
-//   let baseUrl = obj.image.base_url;
-//   console.log(baseUrl)
-//   let fileSize = obj.images.still_sizes[2];
-//   console.log(fileSize)
-//   return baseUrl + fileSize;
-// };
-
-// Get image from TMDB.
-// function successCall(obj) {
-//   var imageUrl = 'https://image.tmdb.org/t/p/w300';
-//   var imagePath = obj.results[0].poster_path;
-//   var imageFullUrl = imageUrl + imagePath;
-//     // imageFullUrl: imageUrl + imagePath
-//   console.log(imageUrl)
-//   console.log(imagePath)
-//   console.log(imageFullUrl)
-// }
-
-// Create a function to pass into the $.getJSON function to show the results.
-// function successCall(data) {
-//   return data.items.map(function(item, index) {
-//     // From the returned call, get variables for image thumbnail, page Id, and append them into the page.
-//     // This will append images into the #photos and show the image thumbnail with a link to the page
-//     // of the video.
-//     var imageBaseUrl = item.images.base_url;
-//     console.log(imageBaseUrl)
-//   });
-// }
-
-
-
+// Search movie API against the bookTitle.
+function searchByTitle() {
+  let apiQuery = {
+    query: searchTerm,
+    api_key: '768e86dde3174110a0fbfe80aa8bbb75'
+  }
+  $.getJSON('https://api.themoviedb.org/3/search/movie', apiQuery, function(data) {
+    let getData = data.items;
+    let getResults = data.total_results;
+    if (getResults != 0) {
+      let getData = data.results[0];
+      renderIsbnResults(getData);
+    } else {
+      $('.js-danger').fadeIn('slow').delay(1000).fadeOut('slow');
+    }
+    // if (radioValue === 'isbn') {
+    //   let getData = data.results[0];
+    //   renderIsbnResults(getData);
+    // } else {
+    //   let getData = data.results;
+    //   renderTitleResults(getData);
+    // }
+  });
+}
 
 /*
-You'll notice that movie, TV and person objects contain references to different
-file paths. In order to generate a fully working image URL, you'll need 3 pieces
-of data. Those pieces are a base_url, a file_size and a file_path.
-
-The first two pieces can be retrieved by calling the /configuration API and
-the third is the file path you're wishing to grab on a particular media object.
-Here's what a full image URL looks like if the poster_path
-of /kqjL17yufvn9OVLyXYpvtyrFfak.jpg was returned for a movie, and you were looking
-for the w500 size:
-
-https://image.tmdb.org/t/p/w500/kqjL17yufvn9OVLyXYpvtyrFfak.jpg
+To search by author, search the movie API against the person. Get the ID and store it.
+Then run a search for the person with that ID to get the results.
 */
+function searchByPerson() {
+  let apiQuery = {
+    query: searchTerm,
+    api_key: '768e86dde3174110a0fbfe80aa8bbb75'
+  }
+  $.getJSON("https://api.themoviedb.org/3/search/person", apiQuery, function(data) {
+    console.log(data)
+    // From the search by author, get the first result and get the bookAuthorId.
+    // Trigger the searchByWriter function.
+    bookAuthorId = data.results[0].id;
+    return searchByWriter();
+  });
+}
+
+// After obtaining the bookAuthorId, search the movie API against the 'combined_credits'.
+// From the search, get the results for 'crew' and push them into allItems array.
+// Fire the renderWritingResults function.
+function searchByWriter() {
+  let getJSONUrl = 'https://api.themoviedb.org/3/person/' + bookAuthorId + '/combined_credits';
+  let apiQuery = {
+    api_key: '768e86dde3174110a0fbfe80aa8bbb75'
+  }
+  $.getJSON(getJSONUrl, apiQuery, function(data) {
+    console.log(data)
+    let getCrewData = data.crew;
+    console.log(getCrewData)
+    for (var i = 0; i < getCrewData.length; i++) {
+      allItems.push(getCrewData[i]);
+    }
+    return renderWritingResults();
+  });
+}
+
+// From the allItems array for each object, get the movie department, and create
+// the image url for the poster of the movie and the full path to the image.
+// From the results, if the department for the author shows 'writing' AND there is
+// a poster image associated with that movie, show them on the page.
+function renderWritingResults() {
+  return allItems.map(function(movie) {
+    let mediaType = movie.media_type;
+    let getTitle = movie.title;
+    let getOverview = movie.overview;
+    let getWritingDept = movie.department;
+    let getPosterPath = movie.poster_path;
+    let getFullImagePath = imagePath + getPosterPath;
+    if (getWritingDept === 'Writing' && getPosterPath != null && mediaType === 'movie') {
+      $('.js-results').append(
+        '<div class="large-4 column">' +
+        '<div class="card-user-profile">' +
+          '<img class="card-user-profile-img" src="' + getFullImagePath + '" alt="' + searchTerm + '"/>' +
+          '<div class="card-user-profile-content card-section">' +
+            '<p class="card-user-profile-name">' + getTitle + '</p>' +
+            '<p class="card-user-profile-status">' + bookAuthor + '</p>' +
+            '<p class="card-user-profile-info">' + getOverview + '</p>' +
+          '</div>' +
+        '</div>' +
+        '</div>'
+      );
+      $('.movie-results').fadeIn('slow');
+    }
+  });
+}
+
+// Render title results.
+function renderTitleResults(getData) {
+  return getData.map(function(movie) {
+    let getTitle = movie.title;
+    let getOverview = movie.overview;
+    let getPosterPath = movie.poster_path;
+    let getFullImagePath = imagePath + getPosterPath;
+    if (getPosterPath != null) {
+      $('.js-results').append(
+        '<div class="large-4 column">' +
+        '<div class="card-user-profile">' +
+          '<img class="card-user-profile-img" src="' + getFullImagePath + '" alt="' + searchTerm + '"/>' +
+          '<div class="card-user-profile-content card-section">' +
+            '<p class="card-user-profile-name">' + getTitle + '</p>' +
+            '<p class="card-user-profile-info">' + getOverview + '</p>' +
+          '</div>' +
+        '</div>' +
+        '</div>'
+      );
+      $('.movie-results').fadeIn('slow');
+    }
+  });
+}
+
+// Render ISBN results.
+function renderIsbnResults(getData) {
+  let getTitle = getData.title;
+  let getOverview = getData.overview;
+  let getPosterPath = getData.poster_path;
+  let getFullImagePath = imagePath + getPosterPath;
+  if (getPosterPath != null) {
+    $('.js-results').append(
+      '<div class="large-4 column">' +
+      '<div class="card-user-profile">' +
+        '<img class="card-user-profile-img" src="' + getFullImagePath + '" alt="' + searchTerm + '"/>' +
+        '<div class="card-user-profile-content card-section">' +
+          '<p class="card-user-profile-name">' + getTitle + '</p>' +
+          '<p class="card-user-profile-status">' + bookAuthor + '</p>' +
+          '<p class="card-user-profile-info">' + getOverview + '</p>' +
+        '</div>' +
+      '</div>' +
+      '</div>'
+    );
+    $('.movie-results').fadeIn('slow');
+  }
+}
+
+// Show correct text in call out depending on the chosen radio button.
+(function showCallOut() {
+	$("input[type=radio]").click(function(event) {
+	let checkedValue = $("input[name='option']:checked").val();
+	if (checkedValue === 'title') {
+		$('.js-callout').text("");
+		$('.js-callout').append(
+		'<h5>Search by Title of Book</h5>' +
+		'<p>Examples: Hidden Figures, Live By Night, The Lost City of Z</p>'
+		);
+	} else if (checkedValue === 'author') {
+		$('.js-callout').text("");
+		$('.js-callout').append(
+		'<h5>Search by Author</h5>' +
+		'<p>Examples: Stephen King, J. K. Rowling, Maurice Sendak</p>'
+		);
+	} else {
+		$('.js-callout').text("");
+		$('.js-callout').append(
+		'<h5>Search by ISBN</h5>' +
+		'<p>Examples: 9781101946343, 978-0-385-35139-3, 0307588378</p>'
+		);
+	}
+	});
+})();
+
+// Clear out everything before new search.
+function clearValues() {
+  searchTerm = $('.js-input').val("");
+}
+
+
+// Event listener for the submit button.
+$('.js-form').submit(function(event) {
+  event.preventDefault();
+  // Get the value of the radio button name (title, author, isbn) and store it
+  // in the global variable.
+  radioValue = $("input[name='option']:checked").val();
+  // Get the value of the user input and store it in the global variable.
+  searchTerm = $('.js-input').val();
+  // Pass on the radioValue and searchTerm to getSearchInput.
+  getMovieConfig();
+  clearValues();
+});
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-// // Revealing Module Pattern
-// var bookWatch = function () {
-//   var apiObj = {
-//     q: searchTerm,
-//     part: 'snippet',
-//     key: 'AIzaSyBMm-e7xij-SURbVFOzlT8sKPWPhxxoUSU',
-//     url: 'https://www.googleapis.com/youtube/v3',
-//     maxResults: 5
-//   }
-//   $.getJSON(apiUrl, query, successCall);
-//
-//   return {
-//     bookWatch: bookWatch
-//   };
-// }();
+// How to restrict the search to exactly the words 'The Shining' and get all results.
+// How to make a function to pass in if its from ISBN, author, title.
