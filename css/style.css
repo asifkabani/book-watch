@@ -8,8 +8,8 @@ h1, h5 {
 }
 
 [type=radio] {
-	width: 20px;
-	height: 20px;
+	width: 40px;
+	height: 40px;
 }
 
 header {
@@ -26,23 +26,27 @@ header {
 }
 
 header h1 {
-  font-size: 3em;;
+  font-size: 8rem;;
   color: #235C99;
-  text-shadow: 1px 1px 1px #f2ece9;
+  text-shadow: 0px 1px 0px #f2ece9;
   margin: 0 0 20px;
 }
 
 header p {
-  font-size: 1.50em;
-  text-shadow: 1px 1px 1px #f2ece9;
-  line-height: 0.5;
+  font-size: 3rem;
+  text-shadow: 0px 1px 0px #f2ece9;
   color: #0f263e;
+}
+
+header p:first-of-type {
+  display: none;
 }
 
 .logo {
   text-shadow: 1px 1px 1px #f2ece9;
-  width: 55px;
-  height: 55px;
+  width: 125px;
+  height: 125px;
+  margin: 1rem 0;
 }
 
 .search-bar {
@@ -56,37 +60,47 @@ header p {
 
 .input-group-field {
   font-family: Arial, sans-serif;
-  font-size: 2.5rem;
-  height: 4rem;
+  font-size: 5rem;
+  height: 10rem;
 }
 
 .button.large {
   background: url(../img/magnifier.png) center center no-repeat;
-  background-size: 25px 25px;
   background-color: #235C99;
-  height: 4rem;
-  font-size: 2rem;
+  height: 10rem;
+  font-size: 5rem;
 }
 
 .form-outer {
   background-color: #F2ECE9;
-  padding: 30px 60px;
-  margin: -80px 30px 0 30px;
+  padding: 30px;
+  margin: -70px 15px 0 15px;
   border-radius: 10px;
+  text-align: center;
 }
 
 .radio-group {
   text-align: center;
+  padding: 3rem 0;
 }
 
 label {
   display: inline;
   font-family: 'Raleway', sans-serif;
   padding: 10px;
-  font-size: 1.5em;
+  font-size: 3.5em;
   text-transform: uppercase;
 	color: #919CAB;
   text-shadow: 1px 1px 1px #F2ECE9;
+}
+
+.callout h5 {
+  font-size: 3rem;
+}
+
+.callout p {
+  font-family: Arial, sans-serif;
+  font-size: 2.5rem;
 }
 
 .callout.warning {
@@ -101,8 +115,47 @@ label {
   color: white;
 }
 
-.callout p {
-  font-family: Arial, sans-serif;
+.hero-section {
+  text-align: center;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-justify-content: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+}
+
+.hero-section-text {
+  border: 1px solid rgb(242, 236, 233);
+}
+
+.hero-section-text h1 {
+  color: #235C99;
+  text-shadow: 1px 1px 1px #f2ece9;
+  font-size: 5rem;
+}
+
+.hero-section-text h2 {
+  font-size: 2rem;
+  color: #35495E;
+  text-shadow: 1px 1px 1px #919CAB;
+  text-transform: uppercase;
+  padding: 0.5rem 0;
+}
+
+.hero-section-text p {
+  color: #333;
+  text-shadow: 1px 1px 1px #f2ece9;
+  padding: 2rem;
+  font-size: 2.5rem;
+}
+
+.hero-section-text img {
+  box-shadow: 5px 5px 10px black;
+  margin: 5rem 0;
 }
 
 .hide {
