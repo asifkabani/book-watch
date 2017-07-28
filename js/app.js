@@ -17,6 +17,8 @@ let bookAuthor = '';
 let bookAuthorId = '';
 // Hold all the ajax results of calls.
 let allItems = [];
+// Hold clean items.
+let allItemsCleaned = [];
 
 
 /*
@@ -60,9 +62,9 @@ function getRadioValue() {
 }
 
 // If the search input are ISBN numbers, make a call to books API and search by
-// the ISBN. If there are results, get the bookTitle and mutate
-// searchTerm to the bookTitle. Get the first author from the results and assign
-// it to bookAuthor. From here searchIsbnByTitle.
+// the ISBN. If there are results, get the bookTitle and mutate searchTerm to the
+// bookTitle. Get the first author from the results and assign it to bookAuthor.
+// From here searchIsbnByTitle.
 function searchBookIsbn() {
   let apiQuery = {
     q: searchTerm,
@@ -103,8 +105,48 @@ function searchIsbnByTitle() {
   });
 }
 
+// From allItems array get the first movie, and from there get the movie title,
+// movie overview, backdrop image path, poster image path. Combine the backdrop
+// and poster partial paths from earlier call in getMovieConfig to make full paths.
+function renderIsbnResults() {
+  let getMovie = allItems[0][0];
+  let movieTitle = getMovie.title;
+  let movieOverview = getMovie.overview;
+  let getBackdropPath = getMovie.backdrop_path;
+  let getPosterPath = getMovie.poster_path;
+  let posterImagePath = posterPath + getPosterPath;
+  let backdropImagePath = backdropPath + getBackdropPath;
+  if (getPosterPath != null) {
+    $('.js-results').html(
+      '<div class="hero-section">' +
+        '<div class="hero-section-text">' +
+          '<img src="' + posterImagePath + '">' +
+          '<h1>' + movieTitle + '</h1>' +
+          '<h2>' + 'Written by: ' + bookAuthor + '</h2>' +
+          '<p>' + movieOverview + '</p>' +
+        '</div>' +
+      '</div>'
+    );
+    // Background is made using inline code because of backdropImagePath value needed.
+    $('.hero-section').css("background", "linear-gradient(rgba(35, 92, 153, 0.75) 5%, rgba(242, 236, 233, 1)) 0%, url(" + backdropImagePath + ") 50% no-repeat");
+    $('.hero-section').css("background-size", "cover");
+    $('.js-results').fadeIn('slow');
+  } else {
+    $('.js-results').html(
+      '<div class="hero-section">' +
+        '<div class="hero-section-text">' +
+          '<h1>' + movieTitle + '</h1>' +
+          '<h2>' + 'Written by: ' + bookAuthor + '</h2>' +
+          '<p>' + movieOverview + '</p>' +
+        '</div>'
+    );
+    $('.hero-section').css("background-color", "white");
+    $('.js-results').fadeIn('slow');
+  }
+}
+
 // Search movie API against the bookTitle. If results found, push the results
-// into the allItems array. Then renderTitleResults.
+// into the allItems array. Then clean up the allItems array using cleanAllItems.
 function searchByTitle() {
   let apiQuery = {
     query: searchTerm,
@@ -114,14 +156,40 @@ function searchByTitle() {
     let getData = data.items;
     let getResults = data.total_results;
     if (getResults != 0) {
-      let getData = data.results;
-      allItems.push(getData);
+      let getDataResults = data.results;
+      allItems = getDataResults;
       renderTitleResults();
     } else {
       $('.js-danger').fadeIn('slow').delay(1000).fadeOut('slow');
     }
   });
 }
+
+// Render title results.
+function renderTitleResults() {
+  return allItems.map(function(movie) {
+    let getPosterPath = movie.poster_path;
+    let getBackdropPath = movie.backdrop_path;
+    if (getPosterPath != null) {
+      let movieTitle = movie.title;
+      let movieOverview = movie.overview;
+      let backdropImagePath = backdropPath + getBackdropPath;
+      let posterImagePath = posterPath + getPosterPath;
+      $('.js-results').append(
+        '<div class="hero-section">' +
+          '<div class="hero-section-text">' +
+            '<img src="' + posterImagePath + '">' +
+            '<h1>' + movieTitle + '</h1>' +
+            '<p>' + movieOverview + '</p>' +
+          '</div>' +
+        '</div>'
+      );
+      $('.hero-section').css("background", "linear-gradient(rgba(35, 92, 153, 0.75) 5%, rgba(242, 236, 233, 1)) 0%");
+      $('.js-results').fadeIn('slow');
+    }
+  });
+}
+
 
 /*
 To search by author, search the movie API against the person. Get the ID and store it.
@@ -167,39 +235,13 @@ function searchByWriter() {
 function renderWritingResults() {
   return allItems.map(function(movie) {
     let mediaType = movie.media_type;
-    let getTitle = movie.title;
-    let getOverview = movie.overview;
-    let getWritingDept = movie.department;
-    let getBackdropPath = movie.backdrop_path;
+    let movieTitle = movie.title;
+    let movieOverview = movie.overview;
+    let writingDept = movie.department;
     let getPosterPath = movie.poster_path;
-    let getFullImagePath = posterPath + getPosterPath;
-    if (getWritingDept === 'Writing' && getPosterPath != null && mediaType === 'movie') {
-      $('.js-results').html(
-        '<div class="hero-section" style="background: linear-gradient(rgba(35, 92, 153, 0.5), rgba(242, 236, 233, 1)), url("http://image.tmdb.org/t/p/w1280/h4DcDCOkQBENWBJZjNlPv3adQfM.jpg") 50% no-repeat;">' +
-          '<div class="hero-section-text">' +
-            '<img src="http://image.tmdb.org/t/p/w300/9fgh3Ns1iRzlQNYuJyK0ARQZU7w.jpg">' +
-            '<h1>The Shining</h1>' +
-            '<p>subtitle about anything you like</p>' +
-          '</div>'
-      );
-      $('.movie-results').fadeIn('slow');
-    }
-  });
-}
-
-// Render title results.
-function renderTitleResults() {
-  return allItems.map(function(movie) {
-    let getBackdropPath = movie.backdrop_path;
-    let getPosterPath = movie.poster_path;
-    if (getPosterPath != null) {
-      let movieTitle = movie.title;
-      let movieOverview = movie.overview;
-      let getBackdropPath = movie.backdrop_path;
-      let getPosterPath = movie.poster_path;
-      let posterImagePath = posterPath + getPosterPath;
-      // let backdropImagePath = backdropPath + getBackdropPath;
-      $('.js-results').html(
+    let posterImagePath = posterPath + getPosterPath;
+    if (writingDept === 'Writing' && getPosterPath != null && mediaType === 'movie') {
+      $('.js-results').append(
         '<div class="hero-section">' +
           '<div class="hero-section-text">' +
             '<img src="' + posterImagePath + '">' +
@@ -208,84 +250,12 @@ function renderTitleResults() {
           '</div>' +
         '</div>'
       );
-      // Background is made using inline code because of backdropImagePath value needed.
-      $('.hero-section').css("background", "linear-gradient(rgba(35, 92, 153, 0.75) 10%, rgba(242, 236, 233, 1)) 0%");
-      $('.hero-section').css("background-size", "cover");
+      $('.hero-section').css("background", "linear-gradient(rgba(35, 92, 153, 0.75) 5%, rgba(242, 236, 233, 1)) 0%");
       $('.js-results').fadeIn('slow');
     }
-    // let movieTitle = movie.title;
-    // let movieOverview = movie.overview;
-    // let getBackdropPath = movie.backdrop_path;
-    // let getPosterPath = movie.poster_path;
-    // let posterImagePath = posterPath + getPosterPath;
-    // let backdropImagePath = backdropPath + getBackdropPath;
-    // if (getPosterPath != null) {
-    //   $('.js-results').html(
-    //     '<div class="hero-section">' +
-    //       '<div class="hero-section-text">' +
-    //         '<img src="' + posterImagePath + '">' +
-    //         '<h1>' + movieTitle + '</h1>' +
-    //         '<h2>' + 'Written by: ' + bookAuthor + '</h2>' +
-    //         '<p>' + movieOverview + '</p>' +
-    //       '</div>'
-    //   );
-    //   // Background is made using inline code because of backdropImagePath value needed.
-    //   $('.hero-section').css("background", "linear-gradient(rgba(35, 92, 153, 0.75) 10%, rgba(242, 236, 233, 1)) 0%, url(" + backdropImagePath + ") 50% no-repeat");
-    //   $('.hero-section').css("background-size", "cover");
-    //   $('.js-results').fadeIn('slow');
-    // } else {
-    //   $('.js-results').html(
-    //     '<div class="hero-section">' +
-    //       '<div class="hero-section-text">' +
-    //         '<h1>' + movieTitle + '</h1>' +
-    //         '<p>' + movieOverview + '</p>' +
-    //       '</div>'
-    //   );
-    //   $('.hero-section').css("background-color", "white");
-    //   $('.js-results').fadeIn('slow');
-    // }
   });
 }
 
-// From allItems array get the first movie, and from there get the movie title,
-// movie overview, backdrop image path, poster image path. Combine the backdrop
-// and poster partial paths from earlier call in getMovieConfig to make full paths.
-function renderIsbnResults() {
-  let getMovie = allItems[0][0];
-  let movieTitle = getMovie.title;
-  let movieOverview = getMovie.overview;
-  let getBackdropPath = getMovie.backdrop_path;
-  let getPosterPath = getMovie.poster_path;
-  let posterImagePath = posterPath + getPosterPath;
-  let backdropImagePath = backdropPath + getBackdropPath;
-  if (getPosterPath != null) {
-    $('.js-results').html(
-      '<div class="hero-section">' +
-        '<div class="hero-section-text">' +
-          '<img src="' + posterImagePath + '">' +
-          '<h1>' + movieTitle + '</h1>' +
-          '<h2>' + 'Written by: ' + bookAuthor + '</h2>' +
-          '<p>' + movieOverview + '</p>' +
-        '</div>' +
-      '</div>'
-    );
-    // Background is made using inline code because of backdropImagePath value needed.
-    $('.hero-section').css("background", "linear-gradient(rgba(35, 92, 153, 0.75) 10%, rgba(242, 236, 233, 1)) 0%, url(" + backdropImagePath + ") 50% no-repeat");
-    $('.hero-section').css("background-size", "cover");
-    $('.js-results').fadeIn('slow');
-  } else {
-    $('.js-results').html(
-      '<div class="hero-section">' +
-        '<div class="hero-section-text">' +
-          '<h1>' + movieTitle + '</h1>' +
-          '<h2>' + 'Written by: ' + bookAuthor + '</h2>' +
-          '<p>' + movieOverview + '</p>' +
-        '</div>'
-    );
-    $('.hero-section').css("background-color", "white");
-    $('.js-results').fadeIn('slow');
-  }
-}
 
 // Show correct text in call out box depending on the chosen radio button. IIFE
 // so the function is started when page is loaded.
@@ -327,6 +297,9 @@ function clearValues() {
 // Event listener for the submit button.
 $('.js-form').submit(function(event) {
   event.preventDefault();
+  // If there is existing content, fade it out first.
+  $('.js-results').hide();
+  $('.js-results').html("");
   // Get the value of the radio button name (title, author, isbn) and store it
   // in the global variable.
   radioValue = $("input[name='option']:checked").val();
