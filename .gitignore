@@ -1,0 +1,9 @@
+/node_modules
+.gitconfig
+*.log
+.idea
+.vscode
+.DS_Store
+
+# Remove this later
+/_webpack.config.js
